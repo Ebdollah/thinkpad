@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/app/firebaseConfig";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
@@ -39,8 +41,27 @@ const ThinkpadBackground = () => {
 };
 
 export const LoginPage = () => {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const router = useRouter();
+
+  const handleLoginUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+      
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+          const user = userCredential.user;
+  
+          console.log("User created:", user);
+          setSuccessMessage("User created successfully!");
+      
+          setFormData({ email: "", password: "" });
+          router.push("/dashboard");
+        } catch (error) {
+          console.error("Error creating user:", error);
+        }
+      };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -62,10 +83,7 @@ export const LoginPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
@@ -73,14 +91,14 @@ export const LoginPage = () => {
       <div className="relative z-10 w-full max-w-md p-8 space-y-6 bg-gray-800 bg-opacity-70 backdrop-blur-md rounded-2xl shadow-2xl border border-amber-700">
         <h2 className="text-3xl font-bold text-center text-amber-400">ThinkPad</h2>
         <p className="text-center text-amber-300 -mt-2">Your digital diary for thoughts</p>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleLoginUser}>
           <div className="flex items-center space-x-2 border border-amber-600 rounded-lg p-3">
             <FaUser className="text-amber-400" />
             <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
               onChange={handleChange}
               className="w-full bg-transparent outline-none text-white"
               required
@@ -111,6 +129,8 @@ export const LoginPage = () => {
             Sign Up
           </Link>
         </p>
+        {successMessage && <p className="text-center text-green-400 font-semibold mt-4">{successMessage}</p>}
+
       </div>
     </div>
   );
