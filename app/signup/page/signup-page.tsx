@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/app/firebaseConfig";
 import Link from "next/link";
 
 const ThinkpadBackground = () => {
@@ -39,15 +42,38 @@ const ThinkpadBackground = () => {
 
 const SignupPage = () => {
     const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const router = useRouter();
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+      e.preventDefault();
+    
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+    
+        await updateProfile(user, { displayName: formData.fullName });
+    
+        const userRef = doc(collection(db, "users"), user.uid);
+        await setDoc(userRef,{
+          fullName: formData.fullName,
+          email: formData.email,
+          createdAt: new Date(),
+        })
+
+        console.log("User created:", user);
+        setSuccessMessage("User created successfully!");
+    
+        setFormData({ fullName: "", email: "", password: "" });
+        router.push("/login");
+      } catch (error) {
+        console.error("Error creating user:", error);
+      }
+    };
+    
   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      console.log(formData);
     };
   
     return (
@@ -55,7 +81,7 @@ const SignupPage = () => {
         <ThinkpadBackground />
         <div className="relative z-10 w-full max-w-md p-8 space-y-6 bg-gray-800 bg-opacity-70 backdrop-blur-md rounded-2xl shadow-2xl border border-amber-700">
           <h2 className="text-3xl font-bold text-center text-amber-400">Sign Up</h2>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleCreateUser}>
             <div className="flex items-center space-x-2 border border-amber-600 rounded-lg p-3">
               <FaUser className="text-amber-400" />
               <input
@@ -99,6 +125,7 @@ const SignupPage = () => {
               Sign Up
             </button>
           </form>
+          {successMessage && <p className="text-center text-green-400 font-semibold mt-4">{successMessage}</p>}
         </div>
       </div>
     );
