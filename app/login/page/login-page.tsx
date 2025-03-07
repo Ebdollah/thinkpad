@@ -54,7 +54,7 @@ export const LoginPage = () => {
           const user = userCredential.user;
   
           console.log("User created:", user);
-          setSuccessMessage("User created successfully!");
+          setSuccessMessage("User logged in successfully!");
       
           setFormData({ email: "", password: "" });
           router.push("/dashboard");
