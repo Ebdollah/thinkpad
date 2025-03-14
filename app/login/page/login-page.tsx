@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
+import { FaUser, FaLock } from "react-icons/fa";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/app/firebaseConfig";
+import { auth } from "@/app/firebaseConfig";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";

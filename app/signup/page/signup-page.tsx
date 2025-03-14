@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/firebaseConfig";
-import Link from "next/link";
 
 const ThinkpadBackground = () => {
     return (
